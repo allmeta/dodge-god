@@ -3,7 +3,10 @@ name:               dodge-god
 version:            0.1.0.0
 
 common shared
-  default-extensions: DeriveAnyClass, OverloadedStrings
+  default-extensions: DeriveAnyClass
+                    , OverloadedStrings
+                    , NoFieldSelectors
+                    , OverloadedRecordDot
   default-language: GHC2021
   build-depends:    base ^>=4.16.3.0,
                     text,
