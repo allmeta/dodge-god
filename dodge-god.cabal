@@ -24,8 +24,10 @@ test-suite decrypt-test
   main-is:          Test.hs
   build-depends:    tasty,
                     tasty-hunit,
+                    tasty-quickcheck,
                     decrypt
   hs-source-dirs:   test
+  other-modules:    ArbitraryInstances
 
 library decrypt
   import:           shared
