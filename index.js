@@ -7,12 +7,11 @@ let KEY=process.env.KEY
 let version=10
 let scores = { mouse: {}, keyboard: {} }
 
-fs.readFile("./scores.json",null,function(err,data){
+fs.readFile("./scores.json",null,(err,data)=>{
 	if(err) {
 	  return fs.writeFile("./scores.json", JSON.stringify(scores))
-	}else{
-	  scores=JSON.parse(data)
 	}
+	scores=JSON.parse(data)
 	console.log(scores)
 })
 
@@ -27,7 +26,7 @@ app.post('/', (req,res)=>{
   }
   res.send(scores)
 })
-app.get('/scores', function(req,res){
+app.get('/scores', (req,res)=>{
 	res.send(scores)
 })
 
@@ -37,10 +36,17 @@ function sortScore(){
 
 function calculateScore(score){
   // [mouse, keyboard, is_pb, your_mouse, your_keyboard, right_version, cheating]
-  let date = new Date()
-  if (!(score.name in scores[score.mode]) ||
-      (score.name in scores[score.mode] && score.time > scores[score.mode][score.name][2])) {
-    
+  let date = new Date().toISOString()
+
+  let notExists = !score.name in scores[score.mode]
+  let beatTime = score.name in scores[score.mode] && score.time > scores[score.mode][score.name][2]
+  let isCorrectVersion = score.version == version
+  let mode = score.mode
+  let isCheating = false
+
+  if ((notExists || beatTime) &&
+      isCorrectVersion &&
+      !isCheating) {
     scores[score.mode][score.name] = [score.dodge, date, score.time]
   }
 }
