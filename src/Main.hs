@@ -1,11 +1,10 @@
 module Main where
 
-import Decrypt
-import Web.Scotty
-import Data.Word
 import Data.Text.Lazy (pack)
-import Data.Aeson.Text (encodeToLazyText)
+import Data.Word
+import Decrypt
 import System.Environment (getEnv)
+import Web.Scotty
 
 main :: IO ()
 main = do
@@ -13,7 +12,7 @@ main = do
   startServer key
 
 startServer :: Word8 -> IO ()
-startServer key = 
+startServer key =
   scotty 3000 $ do
     get "/:word" $ do
       beam <- param "word"
