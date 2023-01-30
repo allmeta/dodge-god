@@ -1,22 +1,28 @@
-module Types (Score, Mode, name, mode, version, dodge, startTime, endTime, time) where
-import GHC.Generics (Generic)
+module Types (Score (..), Mode (..)) where
+
 import Data.Aeson
+import Data.Char qualified as C
+import GHC.Generics (Generic)
 
-data Mode = Mouse | Keyboard 
-  deriving (Show, Generic, ToJSON)
+data Mode = Mouse | Keyboard
+  deriving (Enum, Show, Eq, Generic)
 
-instance FromJSON Mode
-  where 
-    parseJSON (String "mouse") = pure Mouse
-    parseJSON (String "keyboard") = pure Keyboard
-    parseJSON _ = fail "unable to parse"
+parseOptions :: Options
+parseOptions = defaultOptions {constructorTagModifier = map C.toLower}
 
-data Score = Score{
-  name :: String,
-  mode :: Mode,
-  version :: Double,
-  dodge :: Double,
-  startTime :: String,
-  endTime :: String,
-  time :: Double
-} deriving (Show, Generic, FromJSON, ToJSON)
+instance ToJSON Mode where
+  toJSON = genericToJSON parseOptions
+
+instance FromJSON Mode where
+  parseJSON = genericParseJSON parseOptions
+
+data Score = Score
+  { name :: String
+  , mode :: Mode
+  , version :: Double
+  , dodge :: Double
+  , startTime :: String
+  , endTime :: String
+  , time :: Double
+  }
+  deriving (Show, Eq, Generic, FromJSON, ToJSON)
