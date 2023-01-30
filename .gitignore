@@ -1,3 +1,7 @@
 node_modules
 dist-newstyle
 scores.json
+
+# Direnv
+.direnv/
+.envrc
