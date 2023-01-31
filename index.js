@@ -30,10 +30,12 @@ app.get('/scores', (req,res)=>{
 	res.send(scores)
 })
 
-function sortScore(){
-	return Object.entries(scores).sort((a,b)=>b[1][0]-a[1][0])
+let cmp = (a,b) => {
+  if (a[1] == b[1]){
+    return a[2] - b[2]
+  }
+  return b[1] - a[1]
 }
-
 function calculateScore(score){
 
   let date = new Date().toISOString()
@@ -51,8 +53,8 @@ function calculateScore(score){
     console.log(s)
     scores[mode][score._name] = s
   // }
-  let stripDate = s => Object.values(s).map(([n,t,d])=>[n,t,d.split("T")[0]])
-  return {result:[stripDate(scores.mouse), stripDate(scores.keyboard), beatTime, isCorrectVersion, isCheating]}
+  let prepare = s => Object.values(s).sort(cmp).map(([n,t,d])=>[n,t,d.split("T")[0]])
+  return {result:[prepare(scores.mouse), prepare(scores.keyboard), beatTime, isCorrectVersion, isCheating]}
 }
 
 function decrypt(d){
@@ -71,14 +73,13 @@ function encrypt(d){
 
 let j = {
     _name:"Karl",
-    _time:4,
+    _time:10,
     _mode:"mouse",
     _version:9,
     _dodge:2,
     _startTime:"19:54:24",
     _endTime:"19:54:28"
 }
-console.log(calculateScore(j))
 
 app.listen(3000)
 console.log("listening on port 3000")
