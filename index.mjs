@@ -6,7 +6,7 @@ import { inflateSync, deflateSync } from 'zlib'
 
 let KEY=process.env.KEY
 if (!KEY) console.log("KEY not set")
-let VERSION=10
+let VERSION=11
 let FILENAME=`./leaderboard-${VERSION}.json`
 let LEADERBOARD = { mouse: {}, keyboard: {} }
 const PORT=process.env.PORT || 3000
