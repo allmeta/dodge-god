@@ -5,8 +5,10 @@ import { readFile, writeFile } from 'fs'
 import { inflateSync, deflateSync } from 'zlib'
 
 let KEY=process.env.KEY
+if (!KEY) console.log("KEY not set")
 let version=10
 let leaderboard = { mouse: {}, keyboard: {} }
+const PORT=process.env.PORT || 3000
 
 readFile("./leaderboard.json",null,(err,data)=>{
 	if(err) {
@@ -103,6 +105,5 @@ function test(){
   processScore(j)
 }
 
-
-app.listen(3000)
-console.log("listening on port 3000")
+app.listen(PORT)
+console.log(`listening on port ${PORT}`)
