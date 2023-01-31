@@ -1,19 +1,19 @@
-let express = require('express')
+import express, { urlencoded } from 'express'
 let app = express()
-app.use(express.urlencoded({ extended: true }))
-let fs = require('fs')
-let zlib = require('zlib')
+app.use(urlencoded({ extended: true }))
+import { readFile, writeFile } from 'fs'
+import { inflateSync, deflateSync } from 'zlib'
 
 let KEY=process.env.KEY
 let version=10
-let scores = { mouse: {}, keyboard: {} }
+let leaderboard = { mouse: {}, keyboard: {} }
 
-fs.readFile("./scores.json",null,(err,data)=>{
+readFile("./leaderboard.json",null,(err,data)=>{
 	if(err) {
-	  return saveScores()
+	  return saveLeaderboard()
 	}
-	scores=JSON.parse(data)
-	console.log(scores)
+	leaderboard=JSON.parse(data)
+	console.log(leaderboard)
 })
 
 app.post('/', (req,res)=>{
@@ -24,25 +24,25 @@ app.post('/', (req,res)=>{
     return res.end()
   }
   let score = decrypt(s.split(" ").join("+"))
-  let r = calculateScore(score)
+  let r = processScore(score)
   res.send(r)
 })
-app.get('/scores', (req,res)=>{
-	res.send(scores)
+app.get('/leaderboard', (req,res)=>{
+  return res.send({result:[prepare(leaderboard.mouse), prepare(leaderboard.keyboard)]})
 })
 
-function saveScores(){
-  fs.writeFile("./scores.json", JSON.stringify(scores), null, (err,data)=>{
+function saveLeaderboard(){
+  writeFile("./leaderboard.json", JSON.stringify(leaderboard), null, (err,data)=>{
     if(err){
       console.log(err)
     }
   })
 }
 
-function calculateScore(score){
+function processScore(score){
   let date = new Date().toISOString()
-  let notExists = !(score._name in scores[score._mode])
-  let beatTime = score._name in scores[score._mode] && score._time > scores[score._mode][score._name][2]
+  let notExists = !(score._name in leaderboard[score._mode])
+  let beatTime = score._name in leaderboard[score._mode] && score._time > leaderboard[score._mode][score._name][2]
   let isCorrectVersion = score._version == version
   let mode = score._mode
   let isCheating = false
@@ -51,10 +51,10 @@ function calculateScore(score){
       isCorrectVersion &&
       !isCheating) {
     let s = [score._name, score._time, date]
-    scores[mode][score._name] = s
-    saveScores()
+    leaderboard[mode][score._name] = s
+    saveLeaderboard()
   }
-  return {result:[prepare(scores.mouse), prepare(scores.keyboard), beatTime, isCorrectVersion, isCheating]}
+  return {result:[prepare(leaderboard.mouse), prepare(leaderboard.keyboard), beatTime, isCorrectVersion, isCheating]}
 }
 
 let dates="Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
@@ -79,13 +79,13 @@ let cmp = (a,b) => {
 function decrypt(d){
   let b = Buffer.from(d, 'base64')
   let s = b.map(a=>a^KEY)
-  let z = zlib.inflateSync(s)
+  let z = inflateSync(s)
   return JSON.parse(z)
 }
 
 function encrypt(d){
   let j=JSON.stringify(d)
-  return zlib.deflateSync(j)
+  return deflateSync(j)
              .map(a=>a^KEY)
              .toString('base64')
 }
@@ -100,7 +100,7 @@ function test(){
       _startTime:"19:54:24",
       _endTime:"19:54:28"
   }
-  calculateScore(j)
+  processScore(j)
 }
 
 
