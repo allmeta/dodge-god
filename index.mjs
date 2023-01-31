@@ -43,17 +43,20 @@ function saveLeaderboard(){
 
 function processScore(score){
   let date = new Date().toISOString()
-  let notExists = !(score._name in leaderboard[score._mode])
-  let beatTime = score._name in leaderboard[score._mode] && score._time > leaderboard[score._mode][score._name][2]
-  let isCorrectVersion = score._version == version
+  let time = parseFloat(score._time)
   let mode = score._mode
+  let name = score._name
+
+  let notExists = !(name in leaderboard[mode])
+  let beatTime = name in leaderboard[mode] && time > leaderboard[mode][name][1]
+  let isCorrectVersion = score._version == version
   let isCheating = false
 
   if ((notExists || beatTime) &&
       isCorrectVersion &&
       !isCheating) {
-    let s = [score._name, score._time, date]
-    leaderboard[mode][score._name] = s
+    let s = [name, time, date]
+    leaderboard[mode][name] = s
     saveLeaderboard()
   }
   return {result:[prepare(leaderboard.mouse), prepare(leaderboard.keyboard), beatTime, isCorrectVersion, isCheating]}
