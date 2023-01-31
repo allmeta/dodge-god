@@ -7,17 +7,18 @@ import { inflateSync, deflateSync } from 'zlib'
 let KEY=process.env.KEY
 if (!KEY) console.log("KEY not set")
 let VERSION=11
-let FILENAME=`./leaderboard-${VERSION}.json`
+let PORT=process.env.PORT || 3000
+let LEADERBOARD_FN=`./leaderboard-${VERSION}.json`
 let LEADERBOARD = { mouse: {}, keyboard: {} }
-const PORT=process.env.PORT || 3000
 
-readFile(FILENAME,null,(err,data)=>{
+readFile(LEADERBOARD_FN,null,(err,data)=>{
 	if(err) {
 	  return saveLeaderboard()
 	}
 	LEADERBOARD=JSON.parse(data)
 	console.log(LEADERBOARD)
 })
+
 
 app.post('/', (req,res)=>{
   let s = req.body.s
@@ -38,12 +39,13 @@ app.get('/leaderboard', (req,res)=>{
 })
 
 function saveLeaderboard(){
-  writeFile(FILENAME, JSON.stringify(LEADERBOARD), null, (err,data)=>{
+  writeFile(LEADERBOARD_FN, JSON.stringify(LEADERBOARD), null, (err,data)=>{
     if(err){
       console.log(err)
     }
   })
 }
+
 
 function processScore(score){
   let date = new Date().toISOString()
@@ -58,6 +60,8 @@ function processScore(score){
   let isCorrectVersion = score._version == VERSION
   let isCheating = Math.abs(startTime + time - endTime) > 2 + time*.1
 
+  let lastTime = notExists ? 0 : LEADERBOARD[mode][name][3]
+
   if (!isCorrectVersion){
     console.log(`Wrong version:`)
     console.log(score)
@@ -67,9 +71,10 @@ function processScore(score){
     console.log(score)
   }
   else if (notExists || beatTime) {
-    LEADERBOARD[mode][name] = [name, time, date]
-    saveLeaderboard()
+    LEADERBOARD[mode][name] = [name, time, date, lastTime]
   }
+  LEADERBOARD[mode][name][3] += time
+  saveLeaderboard()
 
   return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
 }
@@ -83,9 +88,9 @@ let formatDate = d => {
   return a.reverse().join(".")
 }
 
-let prepare = s => Object.values(s)
+let prepare = mode => Object.values(mode)
                          .sort(cmp)
-                         .map(([n,t,d])=>[n,t,formatDate(d)])
+                         .map(([n,t,d,p])=>[n,t,formatDate(d),p])
 
 let cmp = (a,b) => {
   if (a[1] == b[1]){
@@ -113,7 +118,7 @@ function test(){
       _name:"Karl",
       _time:10,
       _mode:"mouse",
-      _version:10,
+      _version:11,
       _startTime:1230,
       _endTime:1240,
   }
