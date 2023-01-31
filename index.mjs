@@ -62,7 +62,7 @@ function processScore(score){
     leaderboard[mode][name] = s
     saveLeaderboard()
   }
-  return {result:[prepare(leaderboard.mouse), prepare(leaderboard.keyboard), beatTime, isCorrectVersion, isCheating]}
+  return {result:[prepare(leaderboard.mouse), prepare(leaderboard.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
 }
 
 let dates="Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
