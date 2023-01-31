@@ -27,6 +27,9 @@ app.post('/', (req,res)=>{
   }
   let score = decrypt(s.split(" ").join("+"))
   let r = processScore(score)
+  let mRank = r.result[0].findIndex(e=>e[0]==score._name)
+  let kRank = r.result[1].findIndex(e=>e[0]==score._name)
+  r.result.push(mRank, kRank)
   res.send(r)
 })
 app.get('/leaderboard', (req,res)=>{
@@ -96,7 +99,7 @@ function encrypt(d){
 }
 
 function test(){
-  let j = {
+  let score = {
       _name:"Karl",
       _time:10,
       _mode:"mouse",
@@ -105,7 +108,8 @@ function test(){
       _startTime:"19:54:24",
       _endTime:"19:54:28"
   }
-  processScore(j)
+  let r = processScore(score)
+  console.log(r)
 }
 
 app.listen(PORT)
