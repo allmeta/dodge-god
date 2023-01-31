@@ -51,7 +51,10 @@ function calculateScore(score){
     console.log(s)
     scores[mode][score._name] = s
   // }
-  return {result:[Object.values(scores.mouse), Object.values(scores.keyboard), beatTime, scores.mouse[score._name], scores.keyboard[score._keyboard], isCorrectVersion, isCheating]}
+  let m=Object.values(scores.mouse)
+  let k=Object.values(scores.keyboard)
+
+  return {result:[m?m:[], k?k:[], beatTime, scores.mouse[score._name], scores.keyboard[score._keyboard], isCorrectVersion, isCheating]}
 }
 
 function decrypt(d){
