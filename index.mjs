@@ -50,21 +50,30 @@ function processScore(score){
   let time = parseFloat(score._time)
   let mode = score._mode
   let name = score._name
+  let startTime = score._startTime
+  let endTime = score._endTime
 
   let notExists = !(name in LEADERBOARD[mode])
   let beatTime = name in LEADERBOARD[mode] && time > LEADERBOARD[mode][name][1]
   let isCorrectVersion = score._version == VERSION
-  let isCheating = false
+  let isCheating = Math.abs(startTime + time - endTime) > 2 + time*.1
 
-  if ((notExists || beatTime) &&
-      isCorrectVersion &&
-      !isCheating) {
-    let s = [name, time, date]
-    LEADERBOARD[mode][name] = s
+  if (!isCorrectVersion){
+    console.log(`Wrong version:`)
+    console.log(score)
+  }
+  else if (isCheating){
+    console.log(`Cheating:`)
+    console.log(score)
+  }
+  else if (notExists || beatTime) {
+    LEADERBOARD[mode][name] = [name, time, date]
     saveLeaderboard()
   }
+
   return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
 }
+
 
 let dates="Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
 
@@ -105,9 +114,8 @@ function test(){
       _time:10,
       _mode:"mouse",
       _version:10,
-      _dodge:2,
-      _startTime:"19:54:24",
-      _endTime:"19:54:28"
+      _startTime:1230,
+      _endTime:1240,
   }
   let r = processScore(score)
   console.log(r)
