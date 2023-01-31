@@ -31,12 +31,6 @@ app.get('/scores', (req,res)=>{
 	res.send(scores)
 })
 
-let cmp = (a,b) => {
-  if (a[1] == b[1]){
-    return a[2] - b[2]
-  }
-  return b[1] - a[1]
-}
 function saveScores(){
   fs.writeFile("./scores.json", JSON.stringify(scores), null, (err,data)=>{
     if(err){
@@ -60,10 +54,6 @@ function calculateScore(score){
     scores[mode][score._name] = s
     saveScores()
   }
-  let prepare = s => Object.values(s)
-                           .sort(cmp)
-                           .map(([n,t,d])=>[n,t,formatDate(d)])
-  console.log(prepare(scores.mouse))
   return {result:[prepare(scores.mouse), prepare(scores.keyboard), beatTime, isCorrectVersion, isCheating]}
 }
 
@@ -73,6 +63,17 @@ let formatDate = d => {
   let a = d.split("T")[0].split("-")
   a[1] = dates[parseInt(a[1])-1]
   return a.reverse().join(".")
+}
+
+let prepare = s => Object.values(s)
+                         .sort(cmp)
+                         .map(([n,t,d])=>[n,t,formatDate(d)])
+
+let cmp = (a,b) => {
+  if (a[1] == b[1]){
+    return a[2] - b[2]
+  }
+  return b[1] - a[1]
 }
 
 function decrypt(d){
@@ -89,16 +90,19 @@ function encrypt(d){
              .toString('base64')
 }
 
-let j = {
-    _name:"Karl",
-    _time:10,
-    _mode:"mouse",
-    _version:10,
-    _dodge:2,
-    _startTime:"19:54:24",
-    _endTime:"19:54:28"
+function test(){
+  let j = {
+      _name:"Karl",
+      _time:10,
+      _mode:"mouse",
+      _version:10,
+      _dodge:2,
+      _startTime:"19:54:24",
+      _endTime:"19:54:28"
+  }
+  calculateScore(j)
 }
-// calculateScore(j)
+
 
 app.listen(3000)
 console.log("listening on port 3000")
