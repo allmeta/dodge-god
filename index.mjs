@@ -6,16 +6,17 @@ import { inflateSync, deflateSync } from 'zlib'
 
 let KEY=process.env.KEY
 if (!KEY) console.log("KEY not set")
-let version=10
-let leaderboard = { mouse: {}, keyboard: {} }
+let VERSION=10
+let FILENAME=`./leaderboard-${VERSION}.json`
+let LEADERBOARD = { mouse: {}, keyboard: {} }
 const PORT=process.env.PORT || 3000
 
-readFile("./leaderboard.json",null,(err,data)=>{
+readFile(FILENAME,null,(err,data)=>{
 	if(err) {
 	  return saveLeaderboard()
 	}
-	leaderboard=JSON.parse(data)
-	console.log(leaderboard)
+	LEADERBOARD=JSON.parse(data)
+	console.log(LEADERBOARD)
 })
 
 app.post('/', (req,res)=>{
@@ -33,11 +34,11 @@ app.post('/', (req,res)=>{
   res.send(r)
 })
 app.get('/leaderboard', (req,res)=>{
-  return res.send({result:[prepare(leaderboard.mouse), prepare(leaderboard.keyboard)]})
+  return res.send({result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard)]})
 })
 
 function saveLeaderboard(){
-  writeFile("./leaderboard.json", JSON.stringify(leaderboard), null, (err,data)=>{
+  writeFile(FILENAME, JSON.stringify(LEADERBOARD), null, (err,data)=>{
     if(err){
       console.log(err)
     }
@@ -50,19 +51,19 @@ function processScore(score){
   let mode = score._mode
   let name = score._name
 
-  let notExists = !(name in leaderboard[mode])
-  let beatTime = name in leaderboard[mode] && time > leaderboard[mode][name][1]
-  let isCorrectVersion = score._version == version
+  let notExists = !(name in LEADERBOARD[mode])
+  let beatTime = name in LEADERBOARD[mode] && time > LEADERBOARD[mode][name][1]
+  let isCorrectVersion = score._version == VERSION
   let isCheating = false
 
   if ((notExists || beatTime) &&
       isCorrectVersion &&
       !isCheating) {
     let s = [name, time, date]
-    leaderboard[mode][name] = s
+    LEADERBOARD[mode][name] = s
     saveLeaderboard()
   }
-  return {result:[prepare(leaderboard.mouse), prepare(leaderboard.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
+  return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
 }
 
 let dates="Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
