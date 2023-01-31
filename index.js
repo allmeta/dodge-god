@@ -51,10 +51,8 @@ function calculateScore(score){
     console.log(s)
     scores[mode][score._name] = s
   // }
-  let m=Object.values(scores.mouse)
-  let k=Object.values(scores.keyboard)
-
-  return {result:[m?m:[], k?k:[], beatTime, scores.mouse[score._name], scores.keyboard[score._keyboard], isCorrectVersion, isCheating]}
+  let stripDate = s => Object.values(s).map(([n,t,d])=>[n,t,d.split("T")[0]])
+  return {result:[stripDate(scores.mouse), stripDate(scores.keyboard), beatTime, isCorrectVersion, isCheating]}
 }
 
 function decrypt(d){
@@ -72,22 +70,15 @@ function encrypt(d){
 }
 
 let j = {
-    name:"Karl",
-    time:4,
-    mode:"mouse",
-    version:9,
-    dodge:2,
-    startTime:"19:54:24",
-    endTime:"19:54:28"
+    _name:"Karl",
+    _time:4,
+    _mode:"mouse",
+    _version:9,
+    _dodge:2,
+    _startTime:"19:54:24",
+    _endTime:"19:54:28"
 }
-//let s = "vFhvkpQOjwiJkXaWlDaK6A6VFpWUDgmLxTe3N49Pl4XGoW2BAV09vYT1j/nH5Pvh++HZYAbMCO/qjejuzQ1AXKWsraGupqGgxhZSXlNG4qjF1upFTF0s3ewQxsR3D+Vq"
-let s = "vFhvkpRO6w0IiZF2lvQQ9/T1hMUCYmKCIkICoiLS0sLCYv6EYX097eRhjn09YQFtjuRVdhBmJgg4+FS6x/nHVIyOuo7+jFXVQJ+YVpyQ1sZ1hg0UFg4QEA4MwGjx8evBiRjI6FpTzNUwiemN8JeWbMHEo/vuiw=="
-console.log(s)
-console.log(decrypt(s))
-console.log(j)
-console.log(encrypt(j))
-console.log(encrypt(j) == s)
-console.log(decrypt(s) == j)
+console.log(calculateScore(j))
 
 app.listen(3000)
 console.log("listening on port 3000")
