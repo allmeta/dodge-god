@@ -10,7 +10,7 @@ let scores = { mouse: {}, keyboard: {} }
 
 fs.readFile("./scores.json",null,(err,data)=>{
 	if(err) {
-	  return fs.writeFile("./scores.json", JSON.stringify(scores), null, (err,data)=>{})
+	  return saveScores()
 	}
 	scores=JSON.parse(data)
 	console.log(scores)
@@ -18,6 +18,7 @@ fs.readFile("./scores.json",null,(err,data)=>{
 
 app.post('/', (req,res)=>{
   let s = req.body.s
+  console.log('\n----------')
   console.log(s)
   if (!s) {
     return res.end()
@@ -36,6 +37,14 @@ let cmp = (a,b) => {
   }
   return b[1] - a[1]
 }
+function saveScores(){
+  fs.writeFile("./scores.json", JSON.stringify(scores), null, (err,data)=>{
+    if(err){
+      console.log(err)
+    }
+  })
+}
+
 function calculateScore(score){
 
   let date = new Date().toISOString()
@@ -52,6 +61,7 @@ function calculateScore(score){
     let s = [score._name, score._time, date]
     console.log(s)
     scores[mode][score._name] = s
+    saveScores()
   // }
   let prepare = s => Object.values(s).sort(cmp).map(([n,t,d])=>[n,t,d.split("T")[0]])
   return {result:[prepare(scores.mouse), prepare(scores.keyboard), beatTime, isCorrectVersion, isCheating]}
