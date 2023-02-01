@@ -3,6 +3,9 @@ let app = express()
 app.use(urlencoded({ extended: true }))
 import { readFile, writeFile } from 'fs'
 import { inflateSync, deflateSync } from 'zlib'
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration.js'
+dayjs.extend(duration)
 
 let KEY=process.env.KEY
 if (!KEY) console.log("KEY not set")
@@ -46,7 +49,6 @@ function saveLeaderboard(){
   })
 }
 
-
 function processScore(score){
   let date = new Date().toISOString()
   let time = parseFloat(score._time)
@@ -65,10 +67,12 @@ function processScore(score){
   if (!isCorrectVersion){
     console.log(`Wrong version:`)
     console.log(score)
+    return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
   }
   else if (isCheating){
     console.log(`Cheating:`)
     console.log(score)
+    return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
   }
   else if (notExists || beatTime) {
     LEADERBOARD[mode][name] = [name, time, date, lastTime]
@@ -80,17 +84,20 @@ function processScore(score){
 }
 
 
-let dates="Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
-
 let formatDate = d => {
-  let a = d.split("T")[0].split("-")
-  a[1] = dates[parseInt(a[1])-1]
-  return a.reverse().join(".")
+  return dayjs(d).format("YY.MMM.DD")
+}
+
+let formatTotal = p => { 
+  let d = dayjs.duration(p*1000)
+  if (d.hours()>0) return d.format('H:mm:ss')
+  if (d.minutes()>0) return d.format('m:ss')
+  return d.format('s')
 }
 
 let prepare = mode => Object.values(mode)
                          .sort(cmp)
-                         .map(([n,t,d,p])=>[n,t,formatDate(d),p])
+                         .map(([n,t,d,p])=>[n,t,formatDate(d),formatTotal(p)])
 
 let cmp = (a,b) => {
   if (a[1] == b[1]){
@@ -118,13 +125,12 @@ function test(){
       _name:"Karl",
       _time:10,
       _mode:"mouse",
-      _version:11,
+      _version:12,
       _startTime:1230,
       _endTime:1240,
   }
-  let r = processScore(score)
-  console.log(r)
 }
+test()
 
 app.listen(PORT)
 console.log(`listening on port ${PORT}`)
