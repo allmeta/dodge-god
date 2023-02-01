@@ -37,9 +37,6 @@ app.post('/', (req,res)=>{
   }
   score.id = score._name + req.ip
   let r = processScore(score)
-  let mRank = r.result[0].findIndex(e=>e[0]==score.id)
-  let kRank = r.result[1].findIndex(e=>e[0]==score.id)
-  r.result.push(mRank, kRank)
   res.send(r)
 })
 
@@ -81,12 +78,12 @@ function processScore(score){
   if (!isCorrectVersion){
     console.log(`Wrong version:`)
     console.log(score)
-    return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
+    return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating, -1, -1]}
   }
   else if (isCheating){
     console.log(`Cheating:`)
     console.log(score)
-    return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
+    return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating, -1, -1]}
   }
   else if (notExists || beatTime) {
     console.log(`New highscore: ${score.id} ${time}`)
@@ -95,7 +92,10 @@ function processScore(score){
   LEADERBOARD[mode][score.id][3] += time
   saveLeaderboard()
 
-  return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
+  let [sortedMouse, mouseRank] = sortAndPrepare(LEADERBOARD.mouse, score.id)
+  let [sortedKeyboard, keyboardRank] = sortAndPrepare(LEADERBOARD.keyboard, score.id)
+
+  return {result:[sortedMouse, sortedKeyboard, notExists || beatTime, isCorrectVersion, isCheating, mouseRank, keyboardRank]}
 }
 
 let formatDate = d => {
@@ -109,9 +109,15 @@ let formatTotal = p => {
   return d.format('s')
 }
 
-let prepare = mode => Object.values(mode)
-                         .sort(cmp)
-                         .map(([n,t,d,p])=>[n,t,formatDate(d),formatTotal(p)])
+function sortAndPrepare(mode, id){
+  let s = Object.entries(mode)
+          .map(([k,v])=>[...v,k])
+          .sort(cmp)
+
+  let i = s.findIndex(i => i[4] == id)
+  s = s.map(([n, t, d, p, _]) => [n, t, formatDate(d), formatTotal(p)])
+  return [s, i]
+}
 
 let cmp = (a,b) => {
   if (a[1] == b[1]){
@@ -127,7 +133,7 @@ function decrypt(d){
     let z = inflateSync(s)
     return JSON.parse(z)
   }catch (e){
-    console.log('could not decrypt: most likely wrong client version')
+    console.log('could not decrypt: most likely old client version')
   }
 }
 
@@ -143,10 +149,13 @@ function test(){
       _name:"Karl",
       _time:10,
       _mode:"mouse",
-      _version:12,
+      _version:VERSION,
       _startTime:1230,
       _endTime:1240,
+      id:1
   }
+  let r = processScore(score)
+  console.log(r)
 }
 
 app.listen(PORT)
