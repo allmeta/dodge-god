@@ -9,7 +9,7 @@ dayjs.extend(duration)
 
 let KEY=process.env.KEY
 if (!KEY) console.log("KEY not set")
-let VERSION=12
+let VERSION=13
 let PORT=process.env.PORT || 3000
 let LEADERBOARD_FN=`./leaderboard-${VERSION}.json`
 let LEADERBOARD = { mouse: {}, keyboard: {} }
