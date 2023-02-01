@@ -35,9 +35,10 @@ app.post('/', (req,res)=>{
   if (!score){
     return res.end()
   }
+  score.id = score._name + req.ip
   let r = processScore(score)
-  let mRank = r.result[0].findIndex(e=>e[0]==score._name)
-  let kRank = r.result[1].findIndex(e=>e[0]==score._name)
+  let mRank = r.result[0].findIndex(e=>e[0]==score.id)
+  let kRank = r.result[1].findIndex(e=>e[0]==score.id)
   r.result.push(mRank, kRank)
   res.send(r)
 })
@@ -62,14 +63,20 @@ function processScore(score){
   let startTime = score._startTime
   let endTime = score._endTime
 
-  let notExists = !(name in LEADERBOARD[mode])
-  let beatTime = name in LEADERBOARD[mode] && time > LEADERBOARD[mode][name][1]
+  // temp shit while migrating name+ip
+  if(name in LEADERBOARD[mode]){
+    LEADERBOARD[mode][score.id] = LEADERBOARD[mode][name]
+    delete LEADERBOARD[mode][name]
+  }
+
+  let notExists = !(score.id in LEADERBOARD[mode])
+  let beatTime = score.id in LEADERBOARD[mode] && time > LEADERBOARD[mode][score.id][1]
   let isCorrectVersion = score._version == VERSION
   let isCheating = time > 0 && Math.abs(startTime + time - endTime) > 3 + time*.1
 
-  let lastTime = notExists ? 0 : LEADERBOARD[mode][name][3]
+  let lastTime = notExists ? 0 : LEADERBOARD[mode][score.id][3]
 
-  console.log(name)
+  console.log(score.id)
 
   if (!isCorrectVersion){
     console.log(`Wrong version:`)
@@ -82,10 +89,10 @@ function processScore(score){
     return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
   }
   else if (notExists || beatTime) {
-    console.log(`New highscore: ${name} ${time}`)
-    LEADERBOARD[mode][name] = [name, time, date, lastTime]
+    console.log(`New highscore: ${score.id} ${time}`)
+    LEADERBOARD[mode][score.id] = [name, time, date, lastTime]
   }
-  LEADERBOARD[mode][name][3] += time
+  LEADERBOARD[mode][score.id][3] += time
   saveLeaderboard()
 
   return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
