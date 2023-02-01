@@ -65,7 +65,7 @@ function processScore(score){
   let notExists = !(name in LEADERBOARD[mode])
   let beatTime = name in LEADERBOARD[mode] && time > LEADERBOARD[mode][name][1]
   let isCorrectVersion = score._version == VERSION
-  let isCheating = Math.abs(startTime + time - endTime) > 2 + time*.1
+  let isCheating = time > 0 && Math.abs(startTime + time - endTime) > 3 + time*.1
 
   let lastTime = notExists ? 0 : LEADERBOARD[mode][name][3]
 
