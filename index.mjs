@@ -26,7 +26,6 @@ readFile(LEADERBOARD_FN,null,(err,data)=>{
 app.post('/', (req,res)=>{
   let s = req.body.s
   console.log('\n----------')
-  console.log(s)
   if (!s) {
     return res.end()
   }
@@ -75,6 +74,7 @@ function processScore(score){
     return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
   }
   else if (notExists || beatTime) {
+    console.log(`New highscore: ${name} ${time}`)
     LEADERBOARD[mode][name] = [name, time, date, lastTime]
   }
   LEADERBOARD[mode][name][3] += time
