@@ -26,16 +26,22 @@ readFile(LEADERBOARD_FN,null,(err,data)=>{
 app.post('/', (req,res)=>{
   let s = req.body.s
   console.log('\n----------')
+  console.log(req.ip)
   if (!s) {
+    console.log('illegal request')
     return res.end()
   }
   let score = decrypt(s.split(" ").join("+"))
+  if (!score){
+    return res.end()
+  }
   let r = processScore(score)
   let mRank = r.result[0].findIndex(e=>e[0]==score._name)
   let kRank = r.result[1].findIndex(e=>e[0]==score._name)
   r.result.push(mRank, kRank)
   res.send(r)
 })
+
 app.get('/leaderboard', (req,res)=>{
   return res.send({result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard)]})
 })
@@ -63,6 +69,8 @@ function processScore(score){
 
   let lastTime = notExists ? 0 : LEADERBOARD[mode][name][3]
 
+  console.log(name)
+
   if (!isCorrectVersion){
     console.log(`Wrong version:`)
     console.log(score)
@@ -82,7 +90,6 @@ function processScore(score){
 
   return {result:[prepare(LEADERBOARD.mouse), prepare(LEADERBOARD.keyboard), notExists || beatTime, isCorrectVersion, isCheating]}
 }
-
 
 let formatDate = d => {
   return dayjs(d).format("YY.MMM.DD")
@@ -107,10 +114,14 @@ let cmp = (a,b) => {
 }
 
 function decrypt(d){
-  let b = Buffer.from(d, 'base64')
-  let s = b.map(a=>a^KEY)
-  let z = inflateSync(s)
-  return JSON.parse(z)
+  try {
+    let b = Buffer.from(d, 'base64')
+    let s = b.map(a=>a^KEY)
+    let z = inflateSync(s)
+    return JSON.parse(z)
+  }catch (e){
+    console.log('could not decrypt: most likely wrong client version')
+  }
 }
 
 function encrypt(d){
@@ -130,7 +141,6 @@ function test(){
       _endTime:1240,
   }
 }
-test()
 
 app.listen(PORT)
 console.log(`listening on port ${PORT}`)
