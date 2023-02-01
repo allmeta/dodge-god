@@ -92,7 +92,7 @@ function processScore(score){
 }
 
 let formatDate = d => {
-  return dayjs(d).format("YY.MMM.DD")
+  return dayjs(d).format("DD.MMM.YY")
 }
 
 let formatTotal = p => { 
