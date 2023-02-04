@@ -1,6 +1,12 @@
-dist-newstyle
+# Javascript
 node_modules
+
+# Haskell
+dist-newstyle
 
 # Direnv
 .direnv/
 .envrc
+
+# Emacs
+.dir-locals.el
