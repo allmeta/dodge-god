@@ -10,14 +10,13 @@ data Mode = Mouse | Keyboard
 modeParseOptions :: Options
 modeParseOptions = defaultOptions {constructorTagModifier = map C.toLower}
 
-
 instance FromJSON Mode where
   parseJSON = genericParseJSON modeParseOptions
 
 instance ToJSON Mode where
   toJSON = genericToJSON modeParseOptions
 
-data ScoreSubmission = ScoreSubmission 
+data ScoreSubmission = ScoreSubmission
   { name :: String
   , mode :: Mode
   , version :: Int

@@ -8,6 +8,6 @@ import Data.Word (Word8)
 
 encrypt :: Word8 -> BSL.ByteString -> BSL.ByteString
 encrypt key =
-    B64.encode
+  B64.encode
     . BSL.map (`xor` key)
     . Zlib.compress
