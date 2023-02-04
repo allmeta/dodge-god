@@ -35,7 +35,9 @@ jobs:
         run: ghcup install cabal 3.8.1.0 --set
 
       - name: Install dependencies
-        run: cabal build --enable-tests
+        run: |
+          cabal update
+          cabal build --enable-tests
 
       - name: Check formatting
         run: |
