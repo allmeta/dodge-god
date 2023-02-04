@@ -2,40 +2,46 @@ name: Haskell CI
 
 on:
   push:
-    branches: [ "hs" ]
+    branches: ["hs"]
   pull_request:
-    branches: [ "hs" ]
+    branches: ["hs"]
 
 permissions:
   contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Cache
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-cabal
-      with:
-        path: |
-          ~/.cabal/packages
-          ~/.cabal/store
-          ~/.ghcup
-          dist-newstyle
-        key: ${{ runner.os }}-${{ hashFiles('**/*.cabal', '**/cabal.project', '**/cabal.project.freeze') }}
-        restore-keys: |
-          ${{ runner.os }}-
+      - name: Cache
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-cabal
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+            ~/.ghcup
+            dist-newstyle
+          key: ${{ runner.os }}-${{ hashFiles('**/*.cabal', '**/cabal.project', '**/cabal.project.freeze') }}
+          restore-keys: |
+            ${{ runner.os }}-
 
-    - name: Install cabal@3.8.1.8
-      run: ghcup install cabal 3.8.1.0 --set
+      - name: Install cabal@3.8.1.8
+        run: ghcup install cabal 3.8.1.0 --set
 
-    - name: Install dependencies
-      run: cabal build --enable-tests
+      - name: Install dependencies
+        run: cabal build --enable-tests
 
-    - name: Run tests
-      run: cabal test
+      - name: Check formatting
+        run: |
+          set -x
+
+          cabal install fourmolu --constraint 'fourmolu <= 0.10.1.0'
+          $HOME/.cabal/bin/fourmolu --mode check $(find -type f -name "*.hs" -not -path "*/dist-newstyle/*")
+
+      - name: Run tests
+        run: cabal test
