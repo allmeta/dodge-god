@@ -24,6 +24,7 @@ jobs:
           path: |
             ~/.cabal/packages
             ~/.cabal/store
+            ~/.cabal/bin
             ~/.ghcup
             dist-newstyle
           key: ${{ runner.os }}-${{ hashFiles('**/*.cabal', '**/cabal.project', '**/cabal.project.freeze') }}
