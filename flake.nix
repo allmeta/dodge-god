@@ -17,17 +17,19 @@
       devShells.default =
         let
           # The compiler version to use for development
-          compiler-version = "ghc925";
+          compiler-version = "ghc944";
           pkgs = nixpkgs.legacyPackages.${system};
           inherit (pkgs) lib;
           hpkgs = pkgs.haskell.packages.${compiler-version};
+          hlib = pkgs.haskell.lib;
           # Haskell and shell tooling
           tools = with hpkgs; [
             haskell-language-server
             ghc
             cabal-install
             cabal-plan
-            ghcid
+            (hlib.dontCheck ghcid)
+            implicit-hie
             fourmolu
           ];
           # System libraries that need to be symlinked
