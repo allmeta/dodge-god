@@ -42,8 +42,8 @@ jobs:
       - name: Check formatting
         run: |
           set -x
-
-          cabal install fourmolu --constraint 'fourmolu <= 0.10.1.0'
+            
+          [[ -z $HOME/.cabal/bin/fourmolu ]] && cabal install fourmolu --constraint 'fourmolu <= 0.10.1.0'
           $HOME/.cabal/bin/fourmolu --mode check $(find -type f -name "*.hs" -not -path "*/dist-newstyle/*")
 
       - name: Run tests
